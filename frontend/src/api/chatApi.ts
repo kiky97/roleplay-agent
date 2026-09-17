@@ -30,6 +30,28 @@ export async function fetchSession(
   return res.json();
 }
 
+export interface CreateCharacterInput {
+  name: string;
+  avatarEmoji: string;
+  tagline: string;
+  background: string;
+  personality: string;
+  speakingStyle: string;
+}
+
+export async function createCharacter(input: CreateCharacterInput): Promise<Character> {
+  const res = await fetch(`${BASE}/characters`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: '创建失败,请重试' }));
+    throw new Error(err.error || '创建失败,请重试');
+  }
+  return res.json();
+}
+
 export async function streamChat(
   sessionId: string,
   message: string,

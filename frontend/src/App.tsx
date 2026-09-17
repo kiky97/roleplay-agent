@@ -3,11 +3,15 @@ import type { Character } from './types';
 import { fetchCharacters, createSession, fetchSession } from './api/chatApi';
 import { CharacterSelector } from './components/CharacterSelector';
 import { ChatWindow } from './components/ChatWindow';
+import { CreateCharacterForm } from './components/CreateCharacterForm';
 import { loadActiveSession, saveActiveSession, clearActiveSession } from './utils/sessionStorage';
+
+type View = 'list' | 'chat' | 'create';
 
 export default function App() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [active, setActive] = useState<{ character: Character; sessionId: string } | null>(null);
+  const [view, setView] = useState<View>('list');
   const [restoring, setRestoring] = useState(true);
 
   useEffect(() => {
@@ -25,6 +29,7 @@ export default function App() {
       .then((result) => {
         if (result) {
           setActive({ character: result.character, sessionId: result.sessionId });
+          setView('chat');
         } else {
           clearActiveSession();
         }
@@ -37,11 +42,18 @@ export default function App() {
     const sessionId = await createSession(character.id);
     saveActiveSession({ sessionId });
     setActive({ character, sessionId });
+    setView('chat');
   };
 
   const handleBack = () => {
     clearActiveSession();
     setActive(null);
+    setView('list');
+  };
+
+  const handleCharacterCreated = async (character: Character) => {
+    setCharacters((prev) => [...prev, character]);
+    await handleSelect(character);
   };
 
   return (
@@ -56,10 +68,12 @@ export default function App() {
       <main className="app-main">
         {restoring ? (
           <div className="empty-hint">正在恢复上次的对话...</div>
-        ) : active ? (
+        ) : view === 'chat' && active ? (
           <ChatWindow character={active.character} sessionId={active.sessionId} onBack={handleBack} />
+        ) : view === 'create' ? (
+          <CreateCharacterForm onCreated={handleCharacterCreated} onCancel={() => setView('list')} />
         ) : (
-          <CharacterSelector characters={characters} onSelect={handleSelect} />
+          <CharacterSelector characters={characters} onSelect={handleSelect} onCreateNew={() => setView('create')} />
         )}
       </main>
     </div>
