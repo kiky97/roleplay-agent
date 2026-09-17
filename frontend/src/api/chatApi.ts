@@ -22,6 +22,14 @@ export async function fetchMessages(sessionId: string): Promise<Message[]> {
   return res.json();
 }
 
+export async function fetchSession(
+  sessionId: string
+): Promise<{ sessionId: string; character: Character } | null> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}`);
+  if (res.status === 404) return null;
+  return res.json();
+}
+
 export async function streamChat(
   sessionId: string,
   message: string,

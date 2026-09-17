@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../db/client';
-import { streamReply } from '../services/claudeService';
+import { streamReply } from '../services/geminiService';
 import { getContextForSession } from '../services/memoryService';
 
 export const chatRouter = Router();
@@ -35,7 +35,7 @@ chatRouter.post('/', async (req, res) => {
     for await (const chunk of streamReply({
       systemPrompt: session.character.systemPrompt,
       memorySummary: summary,
-      history: [...history, { role: 'user', content: message }],
+      history,
     })) {
       fullReply += chunk;
       res.write(`data: ${JSON.stringify({ type: 'delta', text: chunk })}\n\n`);

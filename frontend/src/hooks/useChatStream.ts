@@ -26,6 +26,14 @@ export function useChatStream(sessionId: string | null) {
         });
       } catch (err) {
         console.error(err);
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last?.role === 'assistant' && last.content === '') {
+            next[next.length - 1] = { role: 'assistant', content: '⚠️ 消息发送失败,请重试' };
+          }
+          return next;
+        });
       } finally {
         setIsStreaming(false);
       }
