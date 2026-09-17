@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Character {
+  id           String    @id @default(cuid())
+  name         String
+  avatarEmoji  String    @default("🎭")
+  tagline      String
+  systemPrompt String
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id])
+  summary     String    @default("")
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+}
